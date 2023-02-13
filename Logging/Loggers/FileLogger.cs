@@ -10,6 +10,9 @@ namespace Logging
     {
         protected readonly object lockObj = new object();
 
+        private static string BaseDirectoryParent
+            => Directory.GetParent(AppContext.BaseDirectory)?.FullName ?? AppContext.BaseDirectory;
+
         public string LogDirectory { get; }
         public string Filename { get; }
         public string Filepath { get; }
@@ -32,9 +35,7 @@ namespace Logging
                 CreateDirectoryIfNotExists(LogDirectory);
             }
             Filepath = Path.Combine(LogDirectory, Filename);
-            var stream = File.Create(Filepath);
-            stream.Close();
-            stream.Dispose();
+            using var stream = File.Create(Filepath);
         }
 
 
@@ -46,7 +47,7 @@ namespace Logging
 
 
         private static string CreateLogDirectoryName()
-            => Path.Combine(AppContext.BaseDirectory, "Logs");
+            => Path.Combine(BaseDirectoryParent, "Logs");
 
         private static void CreateDirectoryIfNotExists(string path)
         {
@@ -61,7 +62,7 @@ namespace Logging
         {
             lock (lockObj)
             {
-                using var writer = new StreamWriter(LogDirectory, true);
+                using var writer = new StreamWriter(Filepath, true);
                 writer.AutoFlush = true;
                 writer.WriteLine(logMessage);
                 writer.Close();

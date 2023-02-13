@@ -31,7 +31,8 @@ namespace LoggingTesting
 
             DeleteDirectoryAfter(logger, () =>
             {
-                var logMessage = logger.GetType().GetMethod("LogMessage");
+                var methods = logger.GetType().GetRuntimeMethods();
+                var logMessage = methods.FirstOrDefault(x => x.Name == "Logging.ILogger.LogMessage");
                 Assert.IsNotNull(logMessage);
 
                 var logLevels = Enumeration.GetAll<LogLevel>().OrderBy(x => x.Id);
