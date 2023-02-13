@@ -65,7 +65,7 @@ namespace LoggingTesting.Tests
                     logException?.Invoke(logger, new object[] { level, message, exception });
                 }
 
-                CheckLog(logger.Filepath);
+                CheckLog(logger.Filepath, true);
             });
         }
 
