@@ -13,6 +13,9 @@ namespace Logging
         private static string BaseDirectoryParent
             => Directory.GetParent(AppContext.BaseDirectory)?.FullName ?? AppContext.BaseDirectory;
 
+        private static string Timestamp
+            => DateTime.Now.ToString("HH:mm:ss");
+
         public string LogDirectory { get; }
         public string Filename { get; }
         public string Filepath { get; }
@@ -40,10 +43,10 @@ namespace Logging
 
 
         void ILogger.LogException(LogLevel level, string message, Exception exception)
-            => WriteLogMessage($"{level} {message} \n\t{exception}");
+            => WriteLogMessage($"{Timestamp} - {level} {message} \n\t{exception}");
 
         void ILogger.LogMessage(LogLevel level, string message)
-            => WriteLogMessage($"{level} {message}");
+            => WriteLogMessage($"{Timestamp} - {level} {message}");
 
 
         private static string CreateLogDirectoryName()
@@ -56,7 +59,6 @@ namespace Logging
                 Directory.CreateDirectory(path);
             }
         }
-
 
         private void WriteLogMessage(string logMessage)
         {
