@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 using System.IO;
 using System.Reflection;
 
-namespace LoggingTesting
+namespace LoggingTesting.Tests
 {
     [TestClass]
     public class FileLoggerTests
