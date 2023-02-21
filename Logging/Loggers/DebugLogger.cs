@@ -9,6 +9,11 @@ namespace Logging.Loggers
 {
     public class DebugLogger : ILogger
     {
+        private static Lazy<DebugLogger> lazy = new Lazy<DebugLogger>(() => new DebugLogger());
+        public static DebugLogger Instance => lazy.Value;
+
+        private DebugLogger() { }
+
         void ILogger.LogException(LogLevel level, string message, Exception exception)
             => WriteLogMessage($"{level} {message} \n\t{exception}");
 

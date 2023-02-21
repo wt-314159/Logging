@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static LoggingTesting.Helpers.DebugListenerHelpers;
 
 namespace LoggingTesting.Tests
 {
@@ -38,7 +39,7 @@ namespace LoggingTesting.Tests
         {
             using var memStream = new MemoryStream(2048);
             var listener = SetupTraceListener(memStream, out StreamWriter writer);
-            var logger = new DebugLogger();
+            var logger = DebugLogger.Instance;
 
             CloseStreamsAfter(listener, writer, memStream, () =>
             {
@@ -64,7 +65,7 @@ namespace LoggingTesting.Tests
         {
             using var memStream = new MemoryStream(4096);
             var listener = SetupTraceListener(memStream, out StreamWriter writer);
-            var logger = new DebugLogger();
+            var logger = DebugLogger.Instance;
 
             CloseStreamsAfter(listener, writer, memStream, () =>
             {
@@ -84,57 +85,6 @@ namespace LoggingTesting.Tests
                 var log = ReadMemoryStream(memStream);
                 CheckLog(log, true);
             });
-        }
-
-        private TextWriterTraceListener SetupTraceListener(MemoryStream memStream, out StreamWriter writer)
-        {
-            writer = new StreamWriter(memStream, Encoding.UTF8) { AutoFlush = true };
-            var listener = new TextWriterTraceListener(writer);
-            Trace.Listeners.Add(listener);
-            return listener;
-        }
-
-        private string ReadMemoryStream(MemoryStream memStream)
-        {
-            memStream.Seek(0, SeekOrigin.Begin);
-            using var reader = new StreamReader(memStream, Encoding.UTF8);
-            return reader.ReadToEnd();
-        }
-
-        private void CloseStreamsAfter(
-            TextWriterTraceListener listener,
-            StreamWriter writer,
-            MemoryStream memStream,
-            Action action)
-        {
-            try
-            {
-                action();
-            }
-            finally
-            {
-                CloseStreams(listener, writer, memStream);
-            }
-        }
-
-        private void CloseStreams(TextWriterTraceListener listener, StreamWriter writer, MemoryStream memStream)
-        {
-            listener.Close();
-            writer.Close();
-            memStream.Close();
-        }
-
-        private void CheckLog(string log, bool exceptions = false)
-        {
-            foreach (var level in Enumeration.GetAll<LogLevel>())
-            {
-                Assert.IsTrue(log.Contains(level.Name));
-                Assert.IsTrue(log.Contains(level.Display));
-                if (exceptions)
-                {
-                    Assert.IsTrue(log.Contains($"Exception for level id: {level.Id}"));
-                }
-            }
         }
     }
 }
