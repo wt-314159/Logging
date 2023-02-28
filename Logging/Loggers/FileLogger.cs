@@ -43,10 +43,19 @@ namespace Logging
 
 
         void ILogger.LogException(LogLevel level, string message, Exception exception)
-            => WriteLogMessage($"{Timestamp} - {level} {message} \n\t{exception}");
+            => WriteLogMessage(level, w => w.WriteLine(message), exception);
 
         void ILogger.LogMessage(LogLevel level, string message)
-            => WriteLogMessage($"{Timestamp} - {level} {message}");
+            => WriteLogMessage(level, w => w.WriteLine(message));
+
+        void ILogger.LogMessage<T0>(LogLevel level, string message, T0 arg0)
+            => WriteLogMessage(level, w => w.WriteLine(message, arg0));
+
+        void ILogger.LogMessage<T0, T1>(LogLevel level, string message, T0 arg0, T1 arg1)
+            => WriteLogMessage(level, w => w.WriteLine(message, arg0, arg1));
+
+        void ILogger.LogMessage<T0, T1, T2>(LogLevel level, string message, T0 arg0, T1 arg1, T2 arg2)
+            => WriteLogMessage(level, w => w.WriteLine(message, arg0, arg1, arg2));
 
 
         private static string CreateLogDirectoryName()
@@ -60,13 +69,34 @@ namespace Logging
             }
         }
 
-        private void WriteLogMessage(string logMessage)
+        private void WriteLogMessage(LogLevel level, Action<StreamWriter> action)
         {
             lock (lockObj)
             {
                 using var writer = new StreamWriter(Filepath, true);
                 writer.AutoFlush = true;
-                writer.WriteLine(logMessage);
+                writer.Write(Timestamp);
+                writer.Write(" - ");
+                writer.Write(level);
+                writer.Write(" ");
+                action(writer);
+                writer.Close();
+                writer.Dispose();
+            }
+        }
+
+        private void WriteLogMessage(LogLevel level, Action<StreamWriter> action, Exception exception)
+        {
+            lock (lockObj)
+            {
+                using var writer = new StreamWriter(Filepath, true);
+                writer.AutoFlush = true;
+                writer.Write(Timestamp);
+                writer.Write(" - ");
+                writer.Write(level);
+                writer.Write(" ");
+                action(writer);
+                writer.WriteLine(exception);
                 writer.Close();
                 writer.Dispose();
             }
